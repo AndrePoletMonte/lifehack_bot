@@ -1,10 +1,11 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F, Router, types
-from aiogram.dispatcher.filters import Command
+from aiogram.filters import Command
 from datetime import datetime
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 import aiosqlite
 from aiogram.enums import ParseMode
+
 
 API_TOKEN = "8051188469:AAGAv6h_jZ_d4TzKiOI3DgwoGiPCus4err4"
 
