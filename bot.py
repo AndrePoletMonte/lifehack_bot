@@ -1,16 +1,16 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F, Router, types
-from aiogram.filters import Command
-from datetime import datetime
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-import aiosqlite
 from aiogram.enums import ParseMode
-
+from aiogram.client.default import DefaultBotProperties
+from aiogram.filters import Command
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from datetime import datetime
+import aiosqlite
 
 API_TOKEN = "8051188469:AAGAv6h_jZ_d4TzKiOI3DgwoGiPCus4err4"
 
-bot = Bot(token=API_TOKEN, parse_mode=ParseMode.HTML)
-dp = Dispatcher(bot)
+bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+dp = Dispatcher()
 router = Router()
 dp.include_router(router)
 
