@@ -163,6 +163,16 @@ async def init_db():
             for text, lang in hacks:
                 await db.execute("INSERT INTO hacks (text, language) VALUES (?, ?)", (text, lang))
         await db.commit()
+async def handle(request):
+    return web.Response(text="Bot is running!")
+
+async def start_web_app():
+    app = web.Application()
+    app.router.add_get("/", handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", 8080)
+    await site.start()
 
 async def main():
     await init_db()
