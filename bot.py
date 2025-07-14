@@ -6,6 +6,7 @@ from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from datetime import datetime
 import aiosqlite
+from aiohttp import web
 
 API_TOKEN = "8051188469:AAGAv6h_jZ_d4TzKiOI3DgwoGiPCus4err4"
 
@@ -165,6 +166,39 @@ async def init_db():
         await db.commit()
 async def handle(request):
     return web.Response(text="Bot is running!")
+async def add_additional_hacks():
+    hacks = [
+        # English lifehacks
+        ("💡 Use a rubber band over a paint can to wipe your brush and avoid mess.", "English"),
+        ("💡 Store sheet sets inside one of their pillowcases to keep them organized.", "English"),
+        ("💡 Use a clothespin to hold a nail when hammering to protect your fingers.", "English"),
+        ("💡 Freeze grapes to chill wine without watering it down.", "English"),
+        ("💡 Keep your razor sharp longer by drying it after use.", "English"),
+        ("💡 Use a muffin tin to serve condiments at a BBQ.", "English"),
+        ("💡 Place a wooden spoon across boiling pasta to prevent it from overflowing.", "English"),
+        ("💡 Use sticky notes to clean between keyboard keys.", "English"),
+        ("💡 Reuse a coffee can to store used cooking oil before discarding.", "English"),
+        ("💡 Put a dryer sheet in your suitcase to keep clothes smelling fresh.", "English"),
+
+        # Serbian lifehacks
+        ("💡 Искористи гумицу на канти са бојом да бришеш четку без нереда.", "Serbian"),
+        ("💡 Чувај комплет постељине у једној од јастучница ради лакшег проналажења.", "Serbian"),
+        ("💡 Користи штипалицу да држиш ексер док куцаш – заштити прсте!", "Serbian"),
+        ("💡 Замрзни грожђе да охладиш вино без разређивања.", "Serbian"),
+        ("💡 Обриши бритвицу после сваког коришћења да дуже траје.", "Serbian"),
+        ("💡 Користи калуп за мафине за сервирање сосова на роштиљу.", "Serbian"),
+        ("💡 Стави дрвену кашику преко воде у шерпи да не прекува.", "Serbian"),
+        ("💡 Лепљивим папирићем очисти тастатуру између тастера.", "Serbian"),
+        ("💡 Поново искористи конзерву кафе за одлагање коришћеног уља.", "Serbian"),
+        ("💡 Стави омекшивач у кофер да ти гардероба лепо мирише.", "Serbian"),
+    ]
+
+    async with aiosqlite.connect("lifehack_bot.db") as db:
+        for text, lang in hacks:
+            await db.execute("INSERT INTO hacks (text, language) VALUES (?, ?)", (text, lang))
+        await db.commit()
+        print("✅ New lifehacks added.")
+
 
 async def start_web_app():
     app = web.Application()
@@ -176,6 +210,8 @@ async def start_web_app():
 
 async def main():
     await init_db()
+    await add_additional_hacks()
+await start_web_app()
     print("Database initialized")
     await dp.start_polling(bot)
 
