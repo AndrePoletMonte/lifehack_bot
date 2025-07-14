@@ -15,6 +15,7 @@ dp = Dispatcher()
 router = Router()
 dp.include_router(router)
 
+
 def get_main_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
@@ -25,6 +26,7 @@ def get_main_keyboard():
         ],
         resize_keyboard=True
     )
+
 
 @router.message(F.text == "🌍 Change Language")
 async def change_language(message: types.Message):
@@ -37,6 +39,7 @@ async def change_language(message: types.Message):
         one_time_keyboard=True
     )
     await message.answer("Choose your language:", reply_markup=language_keyboard)
+
 
 @router.message(F.text.in_(["English", "Serbian"]))
 async def save_language(message: types.Message):
@@ -51,6 +54,7 @@ async def save_language(message: types.Message):
         f"✅ Language set to {new_lang}.",
         reply_markup=get_main_keyboard()
     )
+
 
 @router.message(Command("start"))
 async def cmd_start(message: types.Message):
@@ -70,6 +74,7 @@ async def cmd_start(message: types.Message):
         "✅ Welcome to LifehackDrop!\nYou'll receive daily lifehacks to improve your day.\nPress the button below to get one:",
         reply_markup=get_main_keyboard()
     )
+
 
 @router.message(F.text == "Get Lifehack")
 async def get_lifehack(message: types.Message):
@@ -100,12 +105,14 @@ async def get_lifehack(message: types.Message):
         else:
             await message.answer("No more lifehacks available. Stay tuned!")
 
+
 @router.message(F.text == "🔁 Reset Lifehacks")
 async def reset_lifehacks(message: types.Message):
     async with aiosqlite.connect("lifehack_bot.db") as db:
         await db.execute("UPDATE hacks SET used = 0")
         await db.commit()
     await message.answer("🔄 Lifehacks have been reset. You can receive them again.")
+
 
 @router.message(F.text == "📂 Change Categories")
 async def change_categories(message: types.Message):
@@ -117,6 +124,7 @@ async def change_categories(message: types.Message):
             one_time_keyboard=True
         )
     )
+
 
 async def init_db():
     async with aiosqlite.connect("lifehack_bot.db") as db:
@@ -164,8 +172,12 @@ async def init_db():
             for text, lang in hacks:
                 await db.execute("INSERT INTO hacks (text, language) VALUES (?, ?)", (text, lang))
         await db.commit()
+
+
 async def handle(request):
     return web.Response(text="Bot is running!")
+
+
 async def add_additional_hacks():
     hacks = [
         # English lifehacks
@@ -197,7 +209,7 @@ async def add_additional_hacks():
         for text, lang in hacks:
             await db.execute("INSERT INTO hacks (text, language) VALUES (?, ?)", (text, lang))
         await db.commit()
-        print("✅ New lifehacks added.")
+    print("✅ New lifehacks added.")
 
 
 async def start_web_app():
@@ -208,12 +220,14 @@ async def start_web_app():
     site = web.TCPSite(runner, "0.0.0.0", 8080)
     await site.start()
 
+
 async def main():
     await init_db()
     await add_additional_hacks()
-await start_web_app()
+    await start_web_app()
     print("Database initialized")
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
