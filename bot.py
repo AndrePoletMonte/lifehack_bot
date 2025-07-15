@@ -265,8 +265,9 @@ async def main():
     await add_additional_hacks()
     await start_web_app()
     print("Database initialized")
-await bot.delete_webhook(drop_pending_updates=True)
+    await bot.delete_webhook(drop_pending_updates=True ) 
     await dp.start_polling(bot)
+
 
 
 if __name__ == "__main__":
