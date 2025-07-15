@@ -5,6 +5,8 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from datetime import datetime
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup,State
 import aiosqlite
 from aiohttp import web
 
@@ -14,6 +16,10 @@ bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTM
 dp = Dispatcher()
 router = Router()
 dp.include_router(router)
+ADMINS = [5482018064]
+class BroadcastState(StatesGroup):
+    waiting_for_message = State()
+
 
 
 def get_main_keyboard():
@@ -22,7 +28,8 @@ def get_main_keyboard():
             [KeyboardButton(text="Get Lifehack")],
             [KeyboardButton(text="🔁 Reset Lifehacks")],
             [KeyboardButton(text="🌍 Change Language")],
-            [KeyboardButton(text="📂 Change Categories")]
+            [KeyboardButton(text="📂 Change Categories")],
+            [KeyboardButton(text="📢 Send Broadcast")]
         ],
         resize_keyboard=True
     )
@@ -114,8 +121,29 @@ async def reset_lifehacks(message: types.Message):
     await message.answer("🔄 Lifehacks have been reset. You can receive them again.")
 
 
+   
+@router.message(BroadcastState.waiting_for_message)
+async def send_broadcast(message: types.Message, state: FSMContext):
+    text = message.text
+
+    async with aiosqlite.connect("lifehack_bot.db") as db:
+        async with db.execute("SELECT telegram_id FROM users") as cursor:
+            users = await cursor.fetchall()
+
+    sent = 0
+    for (user_id,) in users:
+        try:
+            await bot.send_message(user_id, f"📢 {text}")
+            sent += 1
+        except:
+            continue
+
+    await message.answer(f"✅ Broadcast sent to {sent} users.")
+    await state.clear()
+
 @router.message(F.text == "📂 Change Categories")
 async def change_categories(message: types.Message):
+
     await message.answer(
         "📌 Select your favorite categories (send as comma-separated list):\nExample: Productivity,Health,Mindfulness\n\nAvailable: Productivity, Health, Mindfulness, Tech, Money",
         reply_markup=ReplyKeyboardMarkup(
@@ -126,6 +154,17 @@ async def change_categories(message: types.Message):
     )
 
 
+@router.message(F.text == "📢 Send Broadcast")
+async def ask_broadcast_permission(message: types.Message, state: FSMContext):
+    if message.from_user.id not in ADMINS:
+        await message.answer("🚫 Access denied.")
+        return
+
+    await message.answer("✉️ Send the broadcast message:")
+    await state.set_state(BroadcastState.waiting_for_message)
+
+
+    
 async def init_db():
     async with aiosqlite.connect("lifehack_bot.db") as db:
         await db.execute("""
