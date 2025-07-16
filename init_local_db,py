@@ -1,0 +1,59 @@
+import asyncio
+import aiosqlite
+from datetime import datetime
+
+async def init_db():
+    async with aiosqlite.connect("lifehack_bot.db") as db:
+        # USERS
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                telegram_id INTEGER PRIMARY KEY,
+                language TEXT,
+                categories TEXT,
+                joined_at TEXT
+            )
+        """)
+        
+        # HACKS
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS hacks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                text TEXT NOT NULL,
+                language TEXT,
+                used INTEGER DEFAULT 0
+            )
+        """)
+
+        # STATS
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                hack_id INTEGER,
+                sent_at TEXT
+            )
+        """)
+
+        
+        await db.execute("""
+            INSERT OR IGNORE INTO users (telegram_id, language, categories, joined_at)
+            VALUES (?, ?, ?, ?)
+        """, (
+            123456789,  # подставь свой Telegram ID для теста
+            "English",
+            "Productivity,Health",
+            datetime.now().isoformat()
+        ))
+
+       
+        await db.execute("""
+            INSERT INTO hacks (text, language)
+            VALUES (?, ?)
+        """, (
+            "💡 Test lifehack for debug purposes", "English"
+        ))
+
+        await db.commit()
+        print("✅ Local database created with 1 user and 1 hack.")
+
+asyncio.run(init_db())

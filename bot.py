@@ -23,7 +23,6 @@ class BroadcastState(StatesGroup):
     waiting_for_message = State()
 
 
-# Генерация клавиатур
 def get_main_keyboard(is_admin=False):
     buttons = [
         [KeyboardButton(text="Get Lifehack")],
@@ -176,7 +175,6 @@ async def send_broadcast(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-# Инициализация БД
 async def init_db():
     async with aiosqlite.connect("lifehack_bot.db") as db:
         await db.execute("""
@@ -203,10 +201,8 @@ async def init_db():
                 sent_at TEXT
             )
         """)
-        await db.commit()
+        await db.commit
 
-
-# Web entrypoint (для Railway / Render)
 async def handle(request):
     return web.Response(text="Bot is running!")
 
@@ -220,11 +216,12 @@ async def start_web_app():
     await site.start()
 
 
-# Основная точка запуска
 async def main():
     await init_db()
     await start_web_app()
     await bot.delete_webhook(drop_pending_updates=True)
+    info = await bot.get_webhook_info()
+    print("Webhook info:", info)
     await dp.start_polling(bot)
 
 
