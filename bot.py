@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-API_TOKEN = os.getenv("8051188469:AAGAv6h_jZ_d4TzKiOI3DgwoGiPCus4err4")
+API_TOKEN = os.getenv("BOT_TOKEN")
 
 bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
