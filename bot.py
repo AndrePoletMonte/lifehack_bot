@@ -201,7 +201,7 @@ async def init_db():
                 sent_at TEXT
             )
         """)
-        await db.commit
+        await db.commit()
 
 async def handle(request):
     return web.Response(text="Bot is running!")
