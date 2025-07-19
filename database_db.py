@@ -1,25 +1,31 @@
-import aiosqlite
-from data.default_hacks import default_hacks
 
-DB_NAME = "lifehack_bot.db"
 
-async def init_db():
-    async with aiosqlite.connect(DB_NAME) as db:
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                user_id INTEGER PRIMARY KEY,
-                language TEXT
-            )
-        """)
+import aiosqlit
+async def create_lifehacks_table():
+    async with aiosqlite.connect("lifehack_bot.db") as db:
         await db.execute("""
             CREATE TABLE IF NOT EXISTS lifehacks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                language TEXT,
-                text TEXT
+                text_en TEXT NOT NULL,
+                text_sr TEXT NOT NULL
             )
         """)
-        await db.execute("DELETE FROM lifehacks")
-
-        for hack in default_hacks:
-            await db.execute("INSERT INTO lifehacks (language, text) VALUES (?, ?)", (hack["language"], hack["text"]))
+        await db.commit
+async def add_lifehack(text_en: str, text_sr: str):
+    async with aiosqlite.connect("lifehack_bot.db") as db:
+        await db.execute(
+            "INSERT INTO lifehacks (text_en, text_sr) VALUES (?, ?)",
+            (text_en, text_sr)
+        )
         await db.commit()
+
+async def get_random_lifehack():
+    async with aiosqlite.connect("lifehack_bot.db") as db:
+        async with db.execute("SELECT text_en, text_sr FROM lifehacks ORDER BY RANDOM() LIMIT 1") as cursor:
+            row = await cursor.fetchone()
+            return row if row else None
+
+async def get_all_lifehacks():
+    async with aiosqlite.connect("lifehack_bot.db") as db:
+        async with db.execute("SELECT text_en, text_sr FROM lifehacks") as cursor:
+            return await cursor.fetchall()

@@ -1,36 +1,33 @@
-from aiogram import Bot, Dispatcher
-from aiogram.enums import ParseMode
-from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import BotCommand
-from dotenv import load_dotenv
 import asyncio
+import logging
 import os
 
-from handlers import user_handlers
-from database import db
+from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
+from aiogram.fsm.strategy import FSMStrategy
+from aiogram.client.default import DefaultBotProperties
+from dotenv import load_dotenv
+
+from handlers import start
+from middlewares.language import LanguageMiddleware
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
-dp = Dispatcher(storage=MemoryStorage())
+logging.basicConfig(level=logging.INFO)
 
-async def set_default_commands(bot: Bot):
-    return await bot.set_my_commands([
-        BotCommand(command="start", description="Start bot"),
-        BotCommand(command="help", description="Help and info")
-    ])
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+dp = Dispatcher(fsm_strategy=FSMStrategy.CHAT)
 
-async def on_startup():
-    await db.init_db()
-    await set_default_commands(bot)
+dp.message.middleware(LanguageMiddleware())
 
-dp.include_router(user_handlers.router)
+dp.include_routers(
+    start.router,
+)
 
 async def main():
-    await on_startup()
-    await bot.delete_webhook(drop_pending_updates=True)  # <- Удаляем webhook здесь
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
