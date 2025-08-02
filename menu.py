@@ -5,10 +5,13 @@ from aiogram.types import Message
 from keyboards.inline import menu_keyboard
 from database.db import get_user_language
 from database.lifehacks import get_random_lifehack
+from database.db import create_tables
 
 router = Router()
 
 @router.message(F.text == "👀 Show me a Lifehack")
+async def on_startup(bot: Bot):
+    await create_tables()
 async def send_lifehack(message: Message):
     user_lang = await get_user_language(message.from_user.id)
     hack = await get_random_lifehack()
