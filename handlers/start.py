@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from keyboards.inline import language_keyboard
+from keyboards.menu import language_kb
 from database.db import add_user
 
 router = Router()
